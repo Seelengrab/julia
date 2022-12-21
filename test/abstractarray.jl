@@ -1822,3 +1822,7 @@ end
 # type stable [x;;] (https://github.com/JuliaLang/julia/issues/45952)
 f45952(x) = [x;;]
 @inferred f45952(1.0)
+
+@testset "#47942" begin
+    @test !isassigned(zeros(161,517), 500, 514)
+end
