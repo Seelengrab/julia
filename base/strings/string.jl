@@ -113,7 +113,7 @@ pointer(s::String, i::Integer) = pointer(s) + Int(i)::Int - 1
 ncodeunits(s::String) = Core.sizeof(s)
 codeunit(s::String) = UInt8
 
-@inline function codeunit(s::String, i::Integer)
+@propagate_inbounds function codeunit(s::String, i::Integer)
     @boundscheck checkbounds(s, i)
     b = GC.@preserve s unsafe_load(pointer(s, i))
     return b
@@ -144,7 +144,7 @@ typemin(::String) = typemin(String)
 @propagate_inbounds thisind(s::String, i::Int) = _thisind_str(s, i)
 
 # s should be String or SubString{String}
-@inline function _thisind_str(s, i::Int)
+@propagate_inbounds function _thisind_str(s, i::Int)
     i == 0 && return 0
     n = ncodeunits(s)
     i == n + 1 && return i
@@ -165,7 +165,7 @@ end
 @propagate_inbounds nextind(s::String, i::Int) = _nextind_str(s, i)
 
 # s should be String or SubString{String}
-@inline function _nextind_str(s, i::Int)
+@propagate_inbounds function _nextind_str(s, i::Int)
     i == 0 && return 1
     n = ncodeunits(s)
     @boundscheck between(i, 1, n) || throw(BoundsError(s, i))
@@ -269,7 +269,7 @@ end
 
 getindex(s::String, r::AbstractUnitRange{<:Integer}) = s[Int(first(r)):Int(last(r))]
 
-@inline function getindex(s::String, r::UnitRange{Int})
+@propagate_inbounds function getindex(s::String, r::UnitRange{Int})
     isempty(r) && return ""
     i, j = first(r), last(r)
     @boundscheck begin
@@ -286,7 +286,7 @@ end
 
 length(s::String) = length_continued(s, 1, ncodeunits(s), ncodeunits(s))
 
-@inline function length(s::String, i::Int, j::Int)
+@propagate_inbounds function length(s::String, i::Int, j::Int)
     @boundscheck begin
         0 < i ≤ ncodeunits(s)+1 || throw(BoundsError(s, i))
         0 ≤ j < ncodeunits(s)+1 || throw(BoundsError(s, j))
